@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation Form / Rezervasyon Formu</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #002045;
+            color: #FFFFFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #002045;
+            padding: 20px;
+            border: 1px solid #D0AE93;
+            box-sizing: border-box;
+            position: relative;
+        }
+        h1 {
+            text-align: center;
+            color: #D0AE93;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .form-section {
+            border: 1px solid #D0AE93;
+            padding: 15px;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        .form-section h2 {
+            margin-top: 0;
+            font-size: 18px;
+            border-bottom: 1px solid #D0AE93;
+            padding-bottom: 5px;
+            color: #D0AE93;
+        }
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .form-group:last-child {
+            margin-right: 0;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #FFFFFF;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #D0AE93;
+            border-radius: 0;
+            font-size: 14px;
+            background-color: #000000;
+            color: #FFFFFF;
+            box-sizing: border-box;
+        }
+        input[type="date"], input[type="time"] {
+            color-scheme: dark;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #FFFFFF;
+            color: #002045;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #D0AE93;
+        }
+        .reset-button {
+            background-color: #4a4a4a;
+            color: #999999;
+            cursor: not-allowed;
+        }
+        .reset-button.active {
+            background-color: #FFFFFF;
+            color: #002045;
+            cursor: pointer;
+        }
+        .reset-button.active:hover {
+            background-color: #D0AE93;
+        }
+        .hidden {
+            display: none;
+        }
+        .info-text {
+            font-size: 12px;
+            color: #D0AE93;
+            margin-top: 5px;
+        }
+        .passenger-info .form-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .passenger-info .form-group {
+            display: flex;
+            align-items: center;
+        }
+        .passenger-info label {
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+        .passenger-info input[type="number"] {
+            width: 60px;
+        }
+        .special-requests .checkbox-group {
+            width: 50%;
+            margin-bottom: 10px;
+        }
+        .language-selector {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        .language-selector select {
+            padding: 5px;
+            font-size: 14px;
+            background-color: #FFFFFF;
+            color: #002045;
+            border: 1px solid #D0AE93;
+            cursor: pointer;
+        }
+        .language-selector select:hover {
+            background-color: #D0AE93;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="language-selector">
+            <select id="languageSelect" onchange="changeLanguage()">
+                <option value="tr">TR</option>
+                <option value="en">EN</option>
+            </select>
+        </div>
+
+        <!-- Turkish content -->
+        <div id="trContent">
+            <h1>Rezervasyon Formu</h1>
+            <form id="reservationFormTr">
+                <div class="form-section">
+                    <h2>MİSAFİR BİLGİLERİ</h2>
+                    <div class="form-group">
+                        <label for="guestNameTr">Misafirlerimizin Adı & Soyadı:</label>
+                        <input type="text" id="guestNameTr" name="guestName" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>UÇUŞ BİLGİLERİ</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="serviceTypeTr">Hizmet Türü:</label>
+                            <select id="serviceTypeTr" name="serviceType" required>
+                                <option value="">Seçiniz</option>
+                                <option value="arrival">Gelen</option>
+                                <option value="departure">Giden</option>
+                                <option value="transit">Transit</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="arrivalInfoTr" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="arrivalServiceDateTr">Gelen Hizmet Tarihi:</label>
+                                <input type="date" id="arrivalServiceDateTr" name="arrivalServiceDate">
+                                <p class="info-text">*Uçağınızın İstanbul Havalimanına <strong>İNİŞ</strong> tarihini yazmanızı rica ederiz.</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="arrivalFlightCodeTr">Gelen Uçuş Kodu:</label>
+                                <input type="text" id="arrivalFlightCodeTr" name="arrivalFlightCode" placeholder="Örn: TK1234">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="departureInfoTr" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="departureServiceDateTr">Giden Uçuş Tarihi:</label>
+                                <input type="date" id="departureServiceDateTr" name="departureServiceDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="departureFlightCodeTr">Giden Uçuş Kodu:</label>
+                                <input type="text" id="departureFlightCodeTr" name="departureFlightCode" placeholder="Örn: TK1234">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section passenger-info">
+                    <h2>YOLCU BİLGİLERİ</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adultCountTr">Yetişkin Sayısı:</label>
+                            <input type="number" id="adultCountTr" name="adultCount" min="0" max="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="seniorCountTr">65+ Yaş Misafir Sayısı:</label>
+                            <input type="number" id="seniorCountTr" name="seniorCount" min="0" max="1000">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="childCountTr">Çocuk Sayısı (7-12 yaş):</label>
+                            <input type="number" id="childCountTr" name="childCount" min="0" max="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="infantCountTr">Bebek Sayısı (0-6 yaş):</label>
+                            <input type="number" id="infantCountTr" name="infantCount" min="0" max="1000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section special-requests">
+                    <h2>ÖZEL İSTEKLER VE İHTİYAÇLAR</h2>
+                    <div class="form-row">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="flowerGreetingTr" name="flowerGreeting">
+                            <label for="flowerGreetingTr">Çiçek ile karşılama</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="cityTransferTr" name="cityTransfer">
+                            <label for="cityTransferTr">Şehiriçi Transfer</label>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="logoGreetingTr" name="logoGreeting">
+                            <label for="logoGreetingTr">Logo ile karşılama</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="gatTransferTr" name="gatTransfer">
+                            <label for="gatTransferTr">GAT Transfer</label>
+                        </div>
+                    </div>
+                    <div id="cityTransferInfoTr" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pickupDateTr">Alınma Tarihi:</label>
+                                <input type="date" id="pickupDateTr" name="pickupDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="pickupTimeTr">Alınma Saati:</label>
+                                <input type="time" id="pickupTimeTr" name="pickupTime">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pickupAddressTr">Adres:</label>
+                                <textarea id="pickupAddressTr" name="pickupAddress" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="otherRequestsTr">Diğer İstekler:</label>
+                            <textarea id="otherRequestsTr" name="otherRequests" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>İRTİBAT BİLGİLERİ</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="authorizedPersonTr">İrtibat Kişisi:</label>
+                            <input type="text" id="authorizedPersonTr" name="authorizedPerson">
+                        </div>
+                        <div class="form-group">
+                            <label for="authorizedNumberTr">İrtibat Kişisi Numarası:</label>
+                            <input type="tel" id="authorizedNumberTr" name="authorizedNumber">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="driverNameTr">Şoför Adı:</label>
+                            <input type="text" id="driverNameTr" name="driverName">
+                        </div>
+                        <div class="form-group">
+                            <label for="driverNumberTr">Şoför Numarası:</label>
+                            <input type="tel" id="driverNumberTr" name="driverNumber">
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="button-container">
+                <button type="button" id="pdfButtonTr">PDF Olarak Kaydet</button>
+                <button type="button" id="resetButtonTr" class="reset-button">Yeni Rezervasyon Oluştur</button>
+            </div>
+        </div>
+
+        <!-- English content -->
+        <div id="enContent" style="display: none;">
+            <h1>Reservation Form</h1>
+            <form id="reservationFormEn">
+                <div class="form-section">
+                    <h2>GUEST INFORMATION</h2>
+                    <div class="form-group">
+                        <label for="guestNameEn">Guest Name & Surname:</label>
+                        <input type="text" id="guestNameEn" name="guestName" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>FLIGHT INFORMATION</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="serviceTypeEn">Service Type:</label>
+                            <select id="serviceTypeEn" name="serviceType" required>
+                                <option value="">Select</option>
+                                <option value="arrival">Arrival</option>
+                                <option value="departure">Departure</option>
+                                <option value="transit">Transit</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="arrivalInfoEn" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="arrivalServiceDateEn">Arrival Service Date:</label>
+                                <input type="date" id="arrivalServiceDateEn" name="arrivalServiceDate">
+                                <p class="info-text">*Please enter the date your flight <strong>LANDS</strong> at Istanbul Airport.</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="arrivalFlightCodeEn">Arrival Flight Code:</label>
+                                <input type="text" id="arrivalFlightCodeEn" name="arrivalFlightCode" placeholder="E.g. TK1234">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="departureInfoEn" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="departureServiceDateEn">Departure Flight Date:</label>
+                                <input type="date" id="departureServiceDateEn" name="departureServiceDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="departureFlightCodeEn">Departure Flight Code:</label>
+                                <input type="text" id="departureFlightCodeEn" name="departureFlightCode" placeholder="E.g. TK1234">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section passenger-info">
+                    <h2>PASSENGER INFORMATION</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adultCountEn">Number of Adults:</label>
+                            <input type="number" id="adultCountEn" name="adultCount" min="0" max="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="seniorCountEn">Number of Senior Guests (65+):</label>
+                            <input type="number" id="seniorCountEn" name="seniorCount" min="0" max="1000">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="childCountEn">Number of Children (7-12 years):</label>
+                            <input type="number" id="childCountEn" name="childCount" min="0" max="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="infantCountEn">Number of Infants (0-6 years):</label>
+                            <input type="number" id="infantCountEn" name="infantCount" min="0" max="1000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section special-requests">
+                    <h2>SPECIAL REQUESTS AND NEEDS</h2>
+                    <div class="form-row">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="flowerGreetingEn" name="flowerGreeting">
+                            <label for="flowerGreetingEn">Greeting with a Flower</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="cityTransferEn" name="cityTransfer">
+                            <label for="cityTransferEn">City Transfer</label>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="logoGreetingEn" name="logoGreeting">
+                            <label for="logoGreetingEn">Greeting with a Logo</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="gatTransferEn" name="gatTransfer">
+                            <label for="gatTransferEn">GAT Transfer</label>
+                        </div>
+                    </div>
+                    <div id="cityTransferInfoEn" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pickupDateEn">Pick-up Date:</label>
+                                <input type="date" id="pickupDateEn" name="pickupDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="pickupTimeEn">Pick-up Time:</label>
+                                <input type="time" id="pickupTimeEn" name="pickupTime">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pickupAddressEn">Address:</label>
+                                <textarea id="pickupAddressEn" name="pickupAddress" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="otherRequestsEn">Other Requests:</label>
+                            <textarea id="otherRequestsEn" name="otherRequests" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>CONTACT INFORMATION</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="authorizedPersonEn">Contact Person:</label>
+                            <input type="text" id="authorizedPersonEn" name="authorizedPerson">
+                        </div>
+                        <div class="form-group">
+                            <label for="authorizedNumberEn">Contact Person's Number:</label>
+                            <input type="tel" id="authorizedNumberEn" name="authorizedNumber">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="driverNameEn">Driver's Name:</label>
+                            <input type="text" id="driverNameEn" name="driverName">
+                        </div>
+                        <div class="form-group">
+                            <label for="driverNumberEn">Driver's Number:</label>
+                            <input type="tel" id="driverNumberEn" name="driverNumber">
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="button-container">
+                <button type="button" id="pdfButtonEn">Save as PDF</button>
+                <button type="button" id="resetButtonEn" class="reset-button">Create New Reservation</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function toggleFlightInfo(lang) {
+                const serviceType = document.getElementById('serviceType' + lang).value;
+                const arrivalInfo = document.getElementById('arrivalInfo' + lang);
+                const departureInfo = document.getElementById('departureInfo' + lang);
+
+                arrivalInfo.classList.add('hidden');
+                departureInfo.classList.add('hidden');
+
+                if (serviceType === 'arrival') {
+                    arrivalInfo.classList.remove('hidden');
+                } else if (serviceType === 'departure') {
+                    departureInfo.classList.remove('hidden');
+                } else if (serviceType === 'transit') {
+                    arrivalInfo.classList.remove('hidden');
+                    departureInfo.classList.remove('hidden');
+                }
+            }
+
+            function toggleCityTransferInfo(lang) {
+                const cityTransferCheckbox = document.getElementById('cityTransfer' + lang);
+                const cityTransferInfo = document.getElementById('cityTransferInfo' + lang);
+
+                if (cityTransferCheckbox.checked) {
+                    cityTransferInfo.classList.remove('hidden');
+                } else {
+                    cityTransferInfo.classList.add('hidden');
+                }
+            }
+
+            function formatFlightCode(input) {
+                let value = input.value.trim().toUpperCase();
+                value = value.replace(/[^A-Z0-9]/g, '');
+                
+                if (value.length >= 2) {
+                    let letters = value.substring(0, 2);
+                    let numbers = value.substring(2).padStart(4, '0');
+                    input.value = letters + numbers;
+                } else {
+                    input.value = value;
+                }
+            }
+
+            function formatDate(dateString) {
+                if (!dateString) return '';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
+            }
+
+            function translateServiceType(type) {
+                switch (type) {
+                    case 'arrival':
+                        return 'Arrival';
+                    case 'departure':
+                        return 'Departure';
+                    case 'transit':
+                        return 'Transit';
+                    default:
+                        return type;
+                }
+            }
+
+            function downloadPDF(lang) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.addFont('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf', 'Roboto', 'normal');
+                doc.setFont('Roboto');
+
+                doc.setFontSize(18);
+                doc.text(lang === 'Tr' ? "Rezervasyon Formu" : "Reservation Form", 105, 15, null, null, "center");
+
+                const formData = new FormData(document.getElementById('reservationForm' + lang));
+                let data = [];
+
+                for (let [key, value] of formData.entries()) {
+                    const labelElement = document.querySelector(`label[for="${key + lang}"]`);
+                    if (labelElement) {
+                        const label = labelElement.textContent;
+                        
+                        if (key.includes('Date')) {
+                            value = formatDate(value);
+                        }
+                        
+                        if (key === 'serviceType') {
+                            value = translateServiceType(value);
+                        }
+
+                        if (key.startsWith('flowerGreeting') || key.startsWith('logoGreeting') || key.startsWith('cityTransfer') || key.startsWith('gatTransfer')) {
+                            value = value === 'on' ? (lang === 'Tr' ? 'Evet' : 'Yes') : (lang === 'Tr' ? 'Hayır' : 'No');
+                        }
+                        
+                        data.push([label, value]);
+                    }
+                }
+
+                doc.autoTable({
+                    head: [[lang === 'Tr' ? 'Alan' : 'Field', lang === 'Tr' ? 'Değer' : 'Value']],
+                    body: data,
+                    startY: 25,
+                    styles: { font: 'Roboto', fontSize: 10, cellPadding: 5 },
+                    columnStyles: { 0: { cellWidth: 100 }, 1: { cellWidth: 90 } }
+                });
+
+                doc.save(lang === 'Tr' ? "rezervasyon_formu.pdf" : "reservation_form.pdf");
+
+                // Activate the reset button after saving PDF
+                activateResetButton(lang);
+            }
+
+            function resetForm(lang) {
+                if (confirm(lang === 'Tr' ? 'Tüm bilgiler silinecek. Emin misiniz?' : 'All information will be deleted. Are you sure?')) {
+                    document.getElementById('reservationForm' + lang).reset();
+                    document.getElementById('arrivalInfo' + lang).classList.add('hidden');
+                    document.getElementById('departureInfo' + lang).classList.add('hidden');
+                    document.getElementById('cityTransferInfo' + lang).classList.add('hidden');
+                    deactivateResetButton(lang);
+                }
+            }
+
+            function activateResetButton(lang) {
+                const resetButton = document.getElementById('resetButton' + lang);
+                resetButton.classList.add('active');
+                resetButton.disabled = false;
+            }
+
+            function deactivateResetButton(lang) {
+                const resetButton = document.getElementById('resetButton' + lang);
+                resetButton.classList.remove('active');
+                resetButton.disabled = true;
+            }
+
+            function addEventListeners(lang) {
+                document.getElementById('serviceType' + lang).addEventListener('change', () => toggleFlightInfo(lang));
+                document.getElementById('cityTransfer' + lang).addEventListener('change', () => toggleCityTransferInfo(lang));
+                
+                const arrivalFlightCode = document.getElementById('arrivalFlightCode' + lang);
+                if (arrivalFlightCode) {
+                    arrivalFlightCode.addEventListener('blur', function() { formatFlightCode(this); });
+                }
+                
+                const departureFlightCode = document.getElementById('departureFlightCode' + lang);
+                if (departureFlightCode) {
+                    departureFlightCode.addEventListener('blur', function() { formatFlightCode(this); });
+                }
+                
+                document.getElementById('pdfButton' + lang).addEventListener('click', () => downloadPDF(lang));
+                document.getElementById('resetButton' + lang).addEventListener('click', () => resetForm(lang));
+
+                // Deactivate reset button initially
+                deactivateResetButton(lang);
+            }
+
+            function changeLanguage() {
+                const lang = document.getElementById('languageSelect').value;
+                document.getElementById('trContent').style.display = lang === 'tr' ? 'block' : 'none';
+                document.getElementById('enContent').style.display = lang === 'en' ? 'block' : 'none';
+                document.documentElement.lang = lang;
+            }
+
+            // Initialize language based on browser settings
+            const userLang = navigator.language || navigator.userLanguage;
+            const defaultLang = userLang.startsWith('tr') ? 'tr' : 'en';
+            document.getElementById('languageSelect').value = defaultLang;
+            changeLanguage();
+
+            // Add event listeners for both languages
+            addEventListeners('Tr');
+            addEventListeners('En');
+
+            // Add event listener for language change
+            document.getElementById('languageSelect').addEventListener('change', changeLanguage);
+        });
+    </script>
+</body>
+</html>
